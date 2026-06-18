@@ -69,6 +69,20 @@ python3 -m http.server 8000
 | `lamp_long`  | 心灯灯种       | 长明灯（置顶常驻）   |
 | `member`     | 我的页         | 问心会员             |
 
+## 支持作者 / Donate
+
+这个版本预留了收费版块，但当前默认不收费。若你基于本项目二开、部署、商业化或拿去赚钱，欢迎打赏一下作者，感谢。
+
+- EVM (ETH/BSC/Polygon, etc.): `0x3EE918603d5a1c0f983BEC5B5d8C301F8ed58A2C`
+- SOL: `2LEDYj19kormPezoiFgZAguyCVsfaM3HExsYe2NWpNqk`
+- BTC: `bc1qs2nwumk24fjtk574f0awaxnh7jl9v7shrd5yw7`
+
+## Contact Me
+
+- X (Twitter): [@JFGAi](https://x.com/JFGAi)
+- Telegram: [https://t.me/jfgae](https://t.me/jfgae)
+- GitHub: [https://github.com/JFGAtlas](https://github.com/JFGAtlas)
+
 ## 数据与隐私
 
 所有用户数据（雅号、心光、灯墙、历史）仅存于浏览器 localStorage，
