@@ -38,6 +38,7 @@
       <label>一句心愿（可不填，最多 30 字）</label>
       <input type="text" id="wish" maxlength="30" placeholder="例如：愿你身体康健，万事不愁">
     </div>
+    <div class="lamp-preview" id="lamp-preview"></div>
     <button class="btn sha block" id="btn-light">点亮此灯（限免）</button>
   </section>
 
@@ -55,17 +56,62 @@
 document.addEventListener('DOMContentLoaded', () => {
   let pickedLamp = LAMPS[0];
 
+  function esc(text) {
+    return String(text == null ? '' : text).replace(/[&<>"']/g, ch => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[ch]));
+  }
+
+  function lampMarkup(l, index, preview) {
+    const name = l.name || '未名';
+    const wish = l.wish || l.defaultWish || l.lampWish || '愿心有所安，所念有光';
+    const lampName = l.lampName || l.name || '';
+    const rel = l.rel ? ' · ' + l.rel : '';
+    const delay = ((index || 0) % 7) * -0.38;
+    return '<div class="wish-lamp' + (preview ? ' preview' : '') + (l.long ? ' long' : '') + '" style="--lamp-color:' + esc(l.color) + ';--delay:' + delay + 's" title="' + esc(wish) + '">' +
+      '<div class="lamp-aura"></div>' +
+      '<div class="lamp-thread"></div>' +
+      '<div class="lantern">' +
+        '<div class="lantern-top"></div>' +
+        '<div class="lantern-body">' +
+          '<span class="lantern-rib rib-a"></span><span class="lantern-rib rib-b"></span>' +
+          '<div class="flame"><i></i></div>' +
+        '</div>' +
+        '<div class="lantern-foot"></div>' +
+      '</div>' +
+      '<div class="wish-paper">' +
+        '<b>' + esc(name) + '</b>' +
+        '<span>' + esc(wish) + '</span>' +
+        '<small>' + esc(lampName + rel) + '</small>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function previewInput() {
+    const name = document.getElementById('who-name').value.trim() || '所念之人';
+    const rel = whoChips.querySelector('.chip.on') ? whoChips.querySelector('.chip.on').textContent : '牵挂';
+    const wish = document.getElementById('wish').value.trim() || pickedLamp.wish;
+    document.getElementById('lamp-preview').innerHTML =
+      '<div class="preview-copy"><span>预览</span><b>' + esc(pickedLamp.name) + '</b></div>' +
+      lampMarkup({ name, rel, wish, lampName: pickedLamp.name, color: pickedLamp.color, long: pickedLamp.id === 'long' }, 0, true);
+  }
+
   /* 灯种选择 */
   const pickEl = document.getElementById('lamp-pick');
   pickEl.innerHTML = LAMPS.map((l, i) =>
     '<div class="lamp-opt' + (i === 0 ? ' on' : '') + '" data-id="' + l.id + '">' +
-    '<div class="dot" style="background:' + l.color + '"></div>' +
+    '<div class="mini-lamp" style="--lamp-color:' + l.color + '"><span></span></div>' +
     '<div class="nm">' + l.name + (l.free ? '' : ' <span class="badge free">限免</span>') + '</div></div>').join('');
   pickEl.addEventListener('click', e => {
     const opt = e.target.closest('.lamp-opt');
     if (!opt) return;
     pickedLamp = LAMPS.find(l => l.id === opt.dataset.id);
     pickEl.querySelectorAll('.lamp-opt').forEach(el => el.classList.toggle('on', el === opt));
+    previewInput();
   });
 
   /* 关系选择 */
@@ -73,7 +119,10 @@ document.addEventListener('DOMContentLoaded', () => {
   whoChips.addEventListener('click', e => {
     if (!e.target.classList.contains('chip')) return;
     whoChips.querySelectorAll('.chip').forEach(el => el.classList.toggle('on', el === e.target));
+    previewInput();
   });
+  document.getElementById('who-name').addEventListener('input', previewInput);
+  document.getElementById('wish').addEventListener('input', previewInput);
 
   function lamps() { return WXG.Store.get('lamps', []); }
 
@@ -81,11 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const list = lamps();
     document.getElementById('wall-empty').style.display = list.length ? 'none' : '';
     document.getElementById('wall-count').textContent = list.length ? '· 共 ' + list.length + ' 盏' : '';
-    document.getElementById('wall').innerHTML = list.map(l =>
-      '<div class="lamp" title="' + (l.wish || '') + '">' +
-      '<div class="flame" style="filter:drop-shadow(0 0 6px ' + l.color + 'cc)"></div>' +
-      '<div class="who">' + l.name + '</div>' +
-      '<div class="type">' + l.lampName + '</div></div>').join('');
+    document.getElementById('wall').innerHTML = list.map((l, i) =>
+      lampMarkup({ name: l.name, rel: l.rel, wish: l.wish, lampName: l.lampName, color: l.color, long: l.lampId === 'long' }, i, false)).join('');
   }
 
   function doLight() {
@@ -96,17 +142,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const light = () => {
       const list = lamps();
-      list.unshift({ name, rel, wish, lampName: pickedLamp.name, color: pickedLamp.color, d: WXG.todayStr() });
+      list.unshift({ name, rel, wish, lampName: pickedLamp.name, lampId: pickedLamp.id, color: pickedLamp.color, d: WXG.todayStr() });
       WXG.Store.set('lamps', list.slice(0, 48));
       renderWall();
+      const firstLamp = document.querySelector('#wall .wish-lamp');
+      if (firstLamp) {
+        firstLamp.classList.add('just-lit');
+        setTimeout(() => firstLamp.classList.remove('just-lit'), 1300);
+      }
       WXG.Light.add(2, '点灯一盏');
       WXG.modal({
         title: '灯已点亮',
-        body: '为「' + name + '」点的' + pickedLamp.name + '已挂上灯墙。<br>' + wish + '。',
+        body: '为「' + esc(name) + '」点的' + pickedLamp.name + '已挂上灯墙。<br>' + esc(wish) + '。',
         okText: '心安'
       });
       document.getElementById('who-name').value = '';
       document.getElementById('wish').value = '';
+      previewInput();
     };
 
     if (!pickedLamp.free) {
@@ -117,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.getElementById('btn-light').addEventListener('click', doLight);
+  previewInput();
   renderWall();
 });
 </script>
