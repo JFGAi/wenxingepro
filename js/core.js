@@ -120,46 +120,87 @@
   const REDUCED = window.matchMedia
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- 液态墨彩背景（低分辨率绘制，靠 CSS blur 出"流动墨色"） ---------- */
+  /* ---------- 玄曜星图背景 ---------- */
   function injectLiquidBg() {
-    if (REDUCED) return; /* CSS 已为减弱动效用户隐藏 .liquid-bg 并给出纯色背景 */
+    if (REDUCED) return;
     const canvas = document.createElement('canvas');
     canvas.className = 'liquid-bg';
     document.body.prepend(canvas);
     const ctx = canvas.getContext('2d');
     if (!ctx) { canvas.remove(); return; }
 
-    /* 光团：青黛 / 流光金 / 赭砂 / 深青，缓慢游走 */
-    const BLOBS = [
-      { c: '79,168,176',  a: .42, r: .52, x: .22, y: .25, vx: .00010, vy: .00013, ph: 0 },
-      { c: '227,194,127', a: .30, r: .44, x: .80, y: .18, vx: .00013, vy: .00009, ph: 2.1 },
-      { c: '194,85,53',   a: .26, r: .40, x: .70, y: .80, vx: .00009, vy: .00012, ph: 4.2 },
-      { c: '46,111,119',  a: .38, r: .58, x: .18, y: .85, vx: .00012, vy: .00010, ph: 5.5 }
-    ];
+    let stars = [];
+    const starSeed = i => {
+      const x = Math.sin(i * 999.73) * 10000;
+      return x - Math.floor(x);
+    };
 
     function resize() {
-      /* 内部分辨率压到 ~1/6，模糊后视觉无损，渲染开销极小 */
-      canvas.width = Math.max(160, Math.floor(window.innerWidth / 6));
-      canvas.height = Math.max(160, Math.floor(window.innerHeight / 6));
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      stars = Array.from({ length: 76 }, (_, i) => ({
+        x: starSeed(i + 1) * window.innerWidth,
+        y: starSeed(i + 101) * window.innerHeight,
+        s: 0.7 + starSeed(i + 201) * 1.2,
+        p: starSeed(i + 301) * Math.PI * 2
+      }));
     }
     resize();
     window.addEventListener('resize', resize);
 
     function frame(t) {
-      const w = canvas.width, h = canvas.height;
+      const w = window.innerWidth, h = window.innerHeight;
       ctx.clearRect(0, 0, w, h);
-      ctx.globalCompositeOperation = 'lighter';
-      for (const b of BLOBS) {
-        const x = (b.x + Math.sin(t * b.vx + b.ph) * .16) * w;
-        const y = (b.y + Math.cos(t * b.vy + b.ph) * .14) * h;
-        const r = b.r * Math.min(w, h) * (1 + Math.sin(t * .00007 + b.ph) * .12);
-        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-        g.addColorStop(0, 'rgba(' + b.c + ',' + b.a + ')');
-        g.addColorStop(1, 'rgba(' + b.c + ',0)');
-        ctx.fillStyle = g;
-        ctx.fillRect(x - r, y - r, r * 2, r * 2);
+
+      ctx.save();
+      ctx.strokeStyle = 'rgba(216,183,109,.08)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += 96) {
+        ctx.beginPath(); ctx.moveTo(x + .5, 0); ctx.lineTo(x + .5, h); ctx.stroke();
       }
-      ctx.globalCompositeOperation = 'source-over';
+      for (let y = 0; y < h; y += 96) {
+        ctx.beginPath(); ctx.moveTo(0, y + .5); ctx.lineTo(w, y + .5); ctx.stroke();
+      }
+
+      const cx = w * .58;
+      const cy = h * .42;
+      const base = Math.min(w, h) * .34;
+      ctx.translate(cx, cy);
+      ctx.rotate(t * 0.000035);
+      ctx.strokeStyle = 'rgba(216,183,109,.18)';
+      [base, base * .72, base * .46].forEach(r => {
+        ctx.beginPath();
+        for (let i = 0; i < 4; i++) {
+          const a = Math.PI / 4 + i * Math.PI / 2;
+          const px = Math.cos(a) * r;
+          const py = Math.sin(a) * r;
+          i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      });
+      ctx.beginPath();
+      ctx.arc(0, 0, base * .58, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(99,176,168,.16)';
+      ctx.stroke();
+      ctx.restore();
+
+      stars.forEach((s, i) => {
+        const a = .25 + Math.sin(t * .001 + s.p) * .18;
+        ctx.fillStyle = i % 5 === 0 ? 'rgba(99,176,168,' + a + ')' : 'rgba(216,183,109,' + a + ')';
+        ctx.fillRect(s.x, s.y, s.s, s.s);
+      });
+      ctx.strokeStyle = 'rgba(99,176,168,.09)';
+      for (let i = 0; i < stars.length - 1; i += 7) {
+        ctx.beginPath();
+        ctx.moveTo(stars[i].x, stars[i].y);
+        ctx.lineTo(stars[i + 1].x, stars[i + 1].y);
+        ctx.stroke();
+      }
     }
     frame(0);
 
@@ -212,8 +253,11 @@
   const TABS = [
     { id: 'home', name: '首页', icon: '☖', href: 'index.html' },
     { id: 'qian', name: '问签', icon: '☴', href: 'qian.html' },
+    { id: 'ming', name: '命盘', icon: '◈', href: 'ming.html' },
     { id: 'today', name: '今日', icon: '☀', href: 'today.html' },
+    { id: 'meng', name: '梦释', icon: '☾', href: 'meng.html' },
     { id: 'deng', name: '心灯', icon: '🕯', href: 'deng.html' },
+    { id: 'xi', name: '静坐', icon: '◌', href: 'xi.html' },
     { id: 'me', name: '我的', icon: '◉', href: 'me.html' }
   ];
 

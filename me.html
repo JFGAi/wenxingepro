@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0E1216">
+  <meta name="theme-color" content="#11100D">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <title>我的 · 问心阁</title>
   <link rel="stylesheet" href="css/style.css">
@@ -29,6 +29,7 @@
     <div class="card-title">今日</div>
     <div class="rec-item"><span>每日一省</span><span id="st-checkin" class="t"></span></div>
     <div class="rec-item"><span>问签</span><span id="st-qian" class="t"></span></div>
+    <div class="rec-item"><span>命盘</span><span id="st-bazi" class="t"></span></div>
     <div class="rec-item"><span>累计静坐</span><span id="st-xi" class="t"></span></div>
     <div class="rec-item"><span>灯墙</span><span id="st-deng" class="t"></span></div>
   </section>
@@ -75,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('st-checkin').textContent = WXG.checkedInToday() ? '已省 ✓' : '尚未签到';
   const qq = WXG.Store.get('qian_quota', {});
   document.getElementById('st-qian').textContent = (qq.date === WXG.todayStr() ? qq.used : 0) + ' 次';
+  document.getElementById('st-bazi').textContent = WXG.Store.get('bazi_history', []).length + ' 张';
   document.getElementById('st-xi').textContent = Math.floor(WXG.Store.get('xi_total', 0) / 60) + ' 分钟';
   document.getElementById('st-deng').textContent = WXG.Store.get('lamps', []).length + ' 盏';
 

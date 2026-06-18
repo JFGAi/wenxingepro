@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0E1216">
-  <meta name="description" content="问心阁 — 不问鬼神，只问本心。问签、今日历、梦释、心灯、静坐，一座安放心绪的小阁。">
+  <meta name="theme-color" content="#11100D">
+  <meta name="description" content="问心阁 — 不问鬼神，只问本心。问签、命盘、今日历、梦释、心灯、静坐，一座安放心绪的小阁。">
   <meta property="og:title" content="问心阁 · 不问鬼神，只问本心">
   <meta property="og:description" content="一支签，一盏灯，一刻静坐。给心绪一个落脚处。">
   <meta name="format-detection" content="telephone=no, email=no, address=no">
@@ -14,41 +14,52 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body data-page="home">
-<main>
-  <section class="hero fade-up">
-    <div class="brand">问心阁</div>
-    <div class="motto">不问鬼神 · 只问本心</div>
-    <div class="inkline"></div>
+<main class="home-main">
+  <section class="home-hero fade-up">
+    <div class="hero-copy">
+      <span class="eyebrow">Wen Xin Ge</span>
+      <h1>问心阁</h1>
+      <p>不问鬼神，只问本心。把签、历、梦、灯、静坐与命盘收在一处，给纷乱的念头一个坐标。</p>
+      <div class="hero-actions">
+        <a class="btn sha" href="ming.html">排命盘</a>
+        <a class="btn ghost" href="qian.html">问一签</a>
+      </div>
+    </div>
+    <div class="hero-orbit" aria-hidden="true">
+      <div class="orbit-ring ring-a"></div>
+      <div class="orbit-ring ring-b"></div>
+      <div class="orbit-center">問</div>
+      <span style="--i:0">甲</span><span style="--i:1">乙</span><span style="--i:2">丙</span><span style="--i:3">丁</span><span style="--i:4">戊</span>
+      <span style="--i:5">己</span><span style="--i:6">庚</span><span style="--i:7">辛</span><span style="--i:8">壬</span><span style="--i:9">癸</span>
+    </div>
   </section>
 
-  <section class="card fade-up">
+  <section class="home-strip fade-up">
     <div class="daily-quote" id="quote"></div>
+    <div class="home-stats">
+      <div><span>心光</span><b id="home-light">0</b></div>
+      <div><span>命盘</span><b id="home-bazi-count">0</b></div>
+      <div><span>灯墙</span><b id="home-lamp-count">0</b></div>
+    </div>
   </section>
 
-  <section class="grid fade-up">
-    <a class="tile" href="qian.html"><span class="ico">☴</span><span class="name">问签</span><span class="hint">三十六问心签</span></a>
-    <a class="tile" href="today.html"><span class="ico">☀</span><span class="name">今日</span><span class="hint">历法宜忌</span></a>
-    <a class="tile" href="meng.html"><span class="ico">☾</span><span class="name">梦释</span><span class="hint">昨夜何梦</span></a>
-    <a class="tile" href="deng.html"><span class="ico">🕯</span><span class="name">心灯</span><span class="hint">为牵挂的人</span></a>
-    <a class="tile" href="xi.html"><span class="ico">◌</span><span class="name">静坐</span><span class="hint">三分钟息</span></a>
-    <a class="tile" href="me.html"><span class="ico">◉</span><span class="name">我的</span><span class="hint">心光与记录</span></a>
+  <section class="feature-grid fade-up">
+    <a class="feature-card primary" href="ming.html"><span class="ico">命</span><span class="name">命盘</span><span class="hint">四柱 · 五行 · 大运</span></a>
+    <a class="feature-card" href="qian.html"><span class="ico">☴</span><span class="name">问签</span><span class="hint">三十六问心签</span></a>
+    <a class="feature-card" href="today.html"><span class="ico">日</span><span class="name">今日</span><span class="hint">历法宜忌</span></a>
+    <a class="feature-card" href="meng.html"><span class="ico">梦</span><span class="name">梦释</span><span class="hint">昨夜何梦</span></a>
+    <a class="feature-card" href="deng.html"><span class="ico">灯</span><span class="name">心灯</span><span class="hint">为牵挂的人</span></a>
+    <a class="feature-card" href="xi.html"><span class="ico">息</span><span class="name">静坐</span><span class="hint">三分钟息</span></a>
+    <a class="feature-card" href="me.html"><span class="ico">我</span><span class="name">我的</span><span class="hint">心光与记录</span></a>
   </section>
 
-  <section class="card fade-up" id="checkin-card">
-    <div class="card-title">每日一省</div>
-    <p style="font-size:14px;color:var(--ink-2);margin-bottom:14px">
-      到此一坐，问自己一句：今天，心安否？签到记心光 +3。
-    </p>
-    <button class="btn block" id="btn-checkin">今日一省 · 签到</button>
-  </section>
-
-  <section class="card fade-up">
-    <div class="card-title">阁中三件事</div>
-    <p style="font-size:14px;color:var(--ink-2)">
-      <b style="color:var(--dai-deep)">一支签</b> —— 签文皆为本阁原创，不占吉凶祸福，只借诗句帮你把心事看清。<br>
-      <b style="color:var(--dai-deep)">一盏灯</b> —— 为牵挂的人点一盏心灯，灯在墙上，人就在心上。<br>
-      <b style="color:var(--dai-deep)">一刻静</b> —— 跟随呼吸静坐片刻，世界很吵，这里很静。
-    </p>
+  <section class="checkin-panel fade-up" id="checkin-card">
+    <div>
+      <span class="eyebrow">Daily Check</span>
+      <h2>今日一省</h2>
+      <p>到此一坐，问自己一句：今天，心安否？</p>
+    </div>
+    <button class="btn" id="btn-checkin">签到 +3</button>
   </section>
 </main>
 
@@ -61,6 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const q = QUOTES[WXG.daySeed('quote') % QUOTES.length];
   document.getElementById('quote').innerHTML =
     '「 ' + q.q + ' 」<span class="from">—— ' + q.f + '</span>';
+  document.getElementById('home-light').textContent = WXG.Light.get();
+  document.getElementById('home-bazi-count').textContent = WXG.Store.get('bazi_history', []).length;
+  document.getElementById('home-lamp-count').textContent = WXG.Store.get('lamps', []).length;
 
   /* 签到 */
   const btn = document.getElementById('btn-checkin');
@@ -68,7 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (WXG.checkedInToday()) { btn.textContent = '今日已省 · 心安'; btn.disabled = true; }
   };
   sync();
-  btn.addEventListener('click', () => { WXG.checkin(); sync(); });
+  btn.addEventListener('click', () => {
+    WXG.checkin();
+    document.getElementById('home-light').textContent = WXG.Light.get();
+    sync();
+  });
 });
 </script>
 </body>

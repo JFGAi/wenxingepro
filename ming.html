@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#11100D">
+  <meta name="description" content="问心阁命盘，以公历或农历出生时间排出四柱八字、十神、五行与大运。">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <title>命盘 · 问心阁</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="ming">
+<main>
+  <header class="pagehead pagehead-command fade-up">
+    <div class="seal">命</div>
+    <div>
+      <h1>命盘</h1>
+      <div class="sub">四柱八字 · 五行十神 · 大运初读</div>
+    </div>
+  </header>
+
+  <section class="bazi-console fade-up">
+    <form id="bazi-form">
+      <div class="console-top">
+        <div>
+          <span class="eyebrow">Bazi Console</span>
+          <h2>排一张安静的盘</h2>
+        </div>
+        <span class="console-mark">问</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>姓名或代称</label>
+          <input type="text" id="bazi-name" maxlength="18" placeholder="可留空">
+        </div>
+        <div class="field">
+          <label>性别</label>
+          <select id="bazi-gender">
+            <option value="male">男</option>
+            <option value="female">女</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>历法</label>
+          <select id="bazi-calendar">
+            <option value="solar">阳历 / 公历</option>
+            <option value="lunar">农历 / 阴历</option>
+          </select>
+        </div>
+        <div class="field leap-field hidden" id="leap-field">
+          <label>闰月</label>
+          <select id="bazi-leap">
+            <option value="no">非闰月</option>
+            <option value="yes">闰月</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>出生日期</label>
+          <input type="date" id="bazi-date" required>
+        </div>
+        <div class="field">
+          <label>出生时间</label>
+          <input type="time" id="bazi-time" value="08:00" required>
+        </div>
+        <div class="field wide">
+          <label>出生地</label>
+          <input type="text" id="bazi-place" maxlength="28" placeholder="例如：辽宁省丹东市">
+        </div>
+      </div>
+
+      <div class="console-actions">
+        <button class="btn sha" type="submit">排出命盘</button>
+        <button class="btn ghost" type="button" id="btn-sample">载入示例</button>
+      </div>
+      <p class="tool-note">默认按北京时间排盘；23:00-00:59 子时采用历法库默认流派。出生地会记录在本地，真太阳时校正留作后续增强。</p>
+    </form>
+  </section>
+
+  <section class="card hidden" id="bazi-result-card">
+    <div id="bazi-result"></div>
+    <div id="bazi-deep-zone" class="deep-action"></div>
+  </section>
+
+  <section class="card fade-up">
+    <div class="card-title">近期命盘</div>
+    <div id="bazi-history"></div>
+  </section>
+</main>
+
+<script src="js/lunar.js"></script>
+<script src="js/core.js"></script>
+<script src="js/data.js"></script>
+<script src="js/premium.js"></script>
+<script src="js/bazi.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('bazi-form');
+  const resultCard = document.getElementById('bazi-result-card');
+  const result = document.getElementById('bazi-result');
+  const deepZone = document.getElementById('bazi-deep-zone');
+  const calendar = document.getElementById('bazi-calendar');
+  const leapField = document.getElementById('leap-field');
+
+  function todayForInput() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function collect() {
+    return {
+      name: document.getElementById('bazi-name').value.trim(),
+      gender: document.getElementById('bazi-gender').value,
+      calendar: calendar.value,
+      leap: document.getElementById('bazi-leap').value === 'yes',
+      date: document.getElementById('bazi-date').value,
+      time: document.getElementById('bazi-time').value,
+      place: document.getElementById('bazi-place').value.trim()
+    };
+  }
+
+  function esc(text) {
+    return String(text == null ? '' : text).replace(/[&<>"']/g, ch => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[ch]));
+  }
+
+  function renderHistory() {
+    const h = WXG.Store.get('bazi_history', []);
+    document.getElementById('bazi-history').innerHTML = h.length
+      ? h.map(r => '<div class="rec-item"><span>' + esc(r.name || '未名命盘') + '<br><span style="font-size:12px;color:var(--ink-3)">' + esc(r.eight) + ' · 日主 ' + esc(r.dayMaster) + '</span></span><span class="t">' + esc(r.date) + '</span></div>').join('')
+      : '<p class="muted">尚未排过命盘。留一张盘，慢慢校准。</p>';
+  }
+
+  function saveHistory(input, chart) {
+    const h = WXG.Store.get('bazi_history', []);
+    h.unshift({
+      name: input.name,
+      eight: chart.eightText,
+      dayMaster: chart.dayMaster + chart.dayElement,
+      date: WXG.todayStr()
+    });
+    WXG.Store.set('bazi_history', h.slice(0, 12));
+    renderHistory();
+  }
+
+  function run(input) {
+    const chart = WXG_BAZI.calculate(input);
+    result.innerHTML = WXG_BAZI.render(chart);
+    deepZone.innerHTML = '<button class="btn block" id="btn-deep-bazi">命局深读 <span class="badge free">限免</span></button>';
+    document.getElementById('btn-deep-bazi').addEventListener('click', () => {
+      Premium.require('deep_bazi', () => {
+        deepZone.innerHTML = WXG_BAZI.renderDeep(chart);
+      });
+    });
+    resultCard.classList.remove('hidden');
+    saveHistory(input, chart);
+    WXG.Light.add(2, '排命盘');
+    window.scrollTo({ top: resultCard.offsetTop - 14, behavior: 'smooth' });
+  }
+
+  calendar.addEventListener('change', () => {
+    leapField.classList.toggle('hidden', calendar.value !== 'lunar');
+  });
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    try {
+      run(collect());
+    } catch (err) {
+      WXG.toast(err.message || '命盘暂时排不出来');
+    }
+  });
+
+  document.getElementById('btn-sample').addEventListener('click', () => {
+    document.getElementById('bazi-name').value = '问心';
+    document.getElementById('bazi-gender').value = 'female';
+    document.getElementById('bazi-calendar').value = 'solar';
+    document.getElementById('bazi-date').value = '1993-12-20';
+    document.getElementById('bazi-time').value = '10:30';
+    document.getElementById('bazi-place').value = '江南';
+    leapField.classList.add('hidden');
+    run(collect());
+  });
+
+  if (!document.getElementById('bazi-date').value) {
+    document.getElementById('bazi-date').value = todayForInput();
+  }
+  renderHistory();
+});
+</script>
+</body>
+</html>

@@ -28,6 +28,7 @@
       member:     { name: '问心会员（年）', price: 28,  desc: '全部深解不限次 · 专属长明灯 · 会员标识' },
       deep_qian:  { name: '签文深解',       price: 6,   desc: '就你所问之事，逐句拆解签意，附行动建议' },
       deep_meng:  { name: '梦境深释',       price: 6,   desc: '结合梦境细节深入解析，附安心指引' },
+      deep_bazi:  { name: '命局深读',       price: 12,  desc: '结合四柱、十神、五行与大运，整理一份克制的命盘笔记' },
       lamp_long:  { name: '长明灯',         price: 19.9, desc: '灯墙置顶常驻，一年长明' },
       extra_qian: { name: '加签一次',       price: 3,   desc: '当日免费次数用完后加签' }
     },
